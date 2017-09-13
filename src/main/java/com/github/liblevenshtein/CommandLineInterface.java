@@ -3,12 +3,15 @@ package com.github.liblevenshtein;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
@@ -360,6 +363,30 @@ public class CommandLineInterface extends Action {
   }
 
   /**
+   * Read the original dictonary terms, and use those as query terms
+   * @return Terms to query against the dictionary.
+   */
+  private List<String> queryDictTerms() {
+    // TODO: reads in from a plain text file only
+    final String path = cli.getOptionValue(FLAG_DICTIONARY);
+    ArrayList<String> queryTerms = new ArrayList<String>();
+    try {
+        // TODO: hardcoded path
+        BufferedReader br = new BufferedReader(new FileReader(path));         
+
+        String query;
+        while ((query = br.readLine()) != null) {
+            queryTerms.add(query);
+        }
+        br.close();
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return queryTerms;
+  }
+
+  /**
    * Where to serialize the dictionary.  This will be null if the dictionary
    * should not be serialzied.
    * @return Where to serialize the dictionary.
@@ -645,6 +672,7 @@ public class CommandLineInterface extends Action {
 
   /**
    * Prints the results of querying the dictionary.
+   * supress header printing for now
    * @param dictionary Spelling candidates to query.
    * @param queryTerms Query terms for the dictionary.
    */
@@ -653,13 +681,13 @@ public class CommandLineInterface extends Action {
       final List<String> queryTerms) {
     final ITransducer<Object> transducer = buildTransducer(dictionary);
     final Printer printer = buildCandidatePrinter();
-    final BiConsumer<StringBuilder, String> header = buildHeaderPrinter();
+    // final BiConsumer<StringBuilder, String> header = buildHeaderPrinter();
 
     final StringBuilder buffer = new StringBuilder(1024);
 
     for (final String queryTerm : queryTerms) {
       final String escapedQuery = StringEscapeUtils.escapeJava(queryTerm);
-      header.accept(buffer, escapedQuery);
+      // header.accept(buffer, escapedQuery);
       for (final Object object : transducer.transduce(queryTerm)) {
         printer.print(buffer, escapedQuery, object);
       }
@@ -673,16 +701,20 @@ public class CommandLineInterface extends Action {
   @Override
   protected void runInternal() throws Exception {
     final SortedDawg dictionary = buildDictionary();
-    final List<String> queryTerms = queryTerms();
+    List<String> queryTerms = queryTerms();
 
-    if (!queryTerms.isEmpty()) {
-      printResults(dictionary, queryTerms);
+    // if no terms then read in our dictionary to use that
+    if (queryTerms.isEmpty()) {
+        queryTerms = queryDictTerms();
     }
+
+    printResults(dictionary, queryTerms);
 
     if (null != serializationPath()) {
       serialize(dictionary);
     }
   }
+
 
   /**
    * Serializes the dictionary to the desired location, as the specified format.

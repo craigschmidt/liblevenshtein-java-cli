@@ -22,20 +22,20 @@ public class CandidatePrinter extends AbstractPrinter {
     final Candidate spellingCandidate = (Candidate) object;
     final String escapedCandidate =
       StringEscapeUtils.escapeJava(spellingCandidate.term());
-    buffer.append("| ")
-      .append("d(")
-        .append('\"')
-          .append(escapedQuery)
-        .append('\"')
-        .append(", ")
-        .append('\"')
-          .append(escapedCandidate)
-        .append('\"')
-      .append(')')
-      .append(" = ")
-      .append('[')
-        .append(spellingCandidate.distance())
-      .append(']');
-    System.out.println(buffer.toString());
+      // don't print the distance 0 ones
+    if (spellingCandidate.distance() > 0) {
+
+      // rather than print out both a,b and b,a
+      // just do if in lexicographic order
+      // a.compareTo(b) returns -1 if a < b
+      if (escapedQuery.compareTo(escapedCandidate) < 0) {
+        buffer.append("*\t").append(escapedQuery)
+            .append('\t')
+            .append(escapedCandidate)
+            .append('\t')
+            .append(spellingCandidate.distance());
+        System.out.println(buffer.toString());              
+      }
+    }
   }
 }
