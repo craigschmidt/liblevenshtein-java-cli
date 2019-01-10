@@ -108,7 +108,7 @@ dependencies {
   compile 'org.projectlombok:lombok:1.+'
   compile 'org.slf4j:slf4j-api:1.7+'
 
-  runtime 'ch.qos.logback:logback-classic:latest.release'
+  runtime 'ch.qos.logback:logback-classic:1.2.3'
   runtime 'org.codehaus.groovy:groovy-all:2.4+'
   runtime 'org.slf4j:jcl-over-slf4j:1.7+'
   runtime 'org.slf4j:jul-to-slf4j:1.7+'
@@ -120,7 +120,7 @@ dependencies {
   testCompile 'org.projectlombok:lombok:latest.release'
   testCompile 'org.testng:testng:latest.release'
 
-  testRuntime 'ch.qos.logback:logback-classic:latest.release'
+  testRuntime 'ch.qos.logback:logback-classic:1.2.3'
   testRuntime 'org.codehaus.groovy:groovy-all:2.4+'
   testRuntime 'org.slf4j:jcl-over-slf4j:1.7+'
   testRuntime 'org.slf4j:jul-to-slf4j:1.7+'
